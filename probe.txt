@@ -1,0 +1,3 @@
+probe line 1
+has "quotes" and \ backslash and regex [\x0-\x9] here
+line 3 end
