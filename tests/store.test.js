@@ -19,6 +19,35 @@ test('load: seeds demo deck when empty', () => {
   const s = S.load(st);
   assert.ok(Object.keys(s.cards).length >= 10);
   assert.ok(Object.values(s.cards).every(c => c.front && c.topic));
+  const kinds = Object.values(s.cards).map(c => c.kind);
+  assert.ok(kinds.includes('mcq'), 'demo seed should include a multiple-choice card');
+  assert.ok(kinds.includes('type'), 'demo seed should include a typed card');
+});
+
+test('load: migrates v1 state (plain cards) to v2 without losing data', () => {
+  const st = memStorage();
+  const v1 = {
+    version: 1,
+    cards: { c1: { id: 'c1', topic: 'T', front: 'Q', back: 'A', summary: '', lastReview: null, ease: null, repetitions: 0, intervalDays: 0 } },
+    reviews: [{ id: 'r1', cardId: 'c1', topic: 'T', ts: new Date().toISOString(), mode: 'study', grade: 2, estimatePct: 70, recalled: true, feynman: '' }],
+    settings: { interleave: true, dailyGoal: 20, sessionSize: 10 }
+  };
+  st.setItem(S.KEY, JSON.stringify(v1));
+  const s = S.load(st);
+  assert.equal(s.version, 2);
+  assert.equal(s.cards.c1.kind, 'flash');
+  assert.equal(s.cards.c1.front, 'Q');
+  assert.equal(s.reviews.length, 1);
+});
+
+test('upsertCard: creates mcq card and validates options/answer', () => {
+  const s = S.emptyState();
+  const c = S.upsertCard(s, { topic: 'T', kind: 'mcq', front: 'Which one?', options: 'A|B|C', answer: 'B' });
+  assert.deepEqual(c.options, ['A', 'B', 'C']);
+  assert.equal(c.answer, 'B');
+  assert.throws(() => S.upsertCard(S.emptyState(), { kind: 'mcq', front: 'Q', options: 'A|B', answer: 'Z' }), /one of the options/);
+  assert.throws(() => S.upsertCard(S.emptyState(), { kind: 'mcq', front: 'Q', options: 'A', answer: 'A' }), /two options/);
+  assert.throws(() => S.upsertCard(S.emptyState(), { kind: 'type', front: 'Q', answer: '' }), /answer/);
 });
 
 test('save + load round-trip preserves cards and reviews', () => {
