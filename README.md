@@ -6,14 +6,14 @@ A local, private study system built on how memory actually works. No account, no
 
 | Technique | What it does in the app |
 | --- | --- |
-| **Retrieval practice** | Every study card is a question. You grade your recall (Failed / Hard / Good / Easy) — the testing effect does the work; recognition doesn't. |
+| **Retrieval practice** | Every study card is a question. Three card types: **flashcards** (you grade your recall — Failed / Hard / Good / Easy), **multiple choice** and **fill-in-the-blank** (the app grades the answer the moment you give it, like Duolingo — no self-grading to game). The testing effect does the work; recognition doesn't. |
 | **Spaced practice** | SM-2-style scheduler. Intervals grow only after successful recall (1d → 3d → …), failed cards reset to today, hard cards grow slower. The "due" badge shows what's waiting. |
 | **Rereading** | Deliberately paired with retrieval, because standalone rereading is the weakest study method (fluency without memory). Reread mode: read the explanation once, close it, recall from memory, then compare. Only the recall counts toward the schedule. |
 | **Summarization** | Each card carries a *your one-line summary* field, written in your own words. Insights tracks what percentage of cards are actually summarised. |
 | **Interleaving** | Toggle in Study. On: the session mixes topics round-robin (harder moment to moment, trains strategy selection). Off: blocked topic groups (better for first acquisition). Comparing the two is part of the method. |
 | **Metacognition** | A confidence slider appears before every reveal; the session summary compares your predictions with actual recall and nudges when you're over- or under-confident. Insights shows a calibration chart (diagonal = perfect), Brier score, bias, a 14-day activity chart and your streak. |
 
-The demo deck that ships (10 cards across the six topics) teaches the techniques with the app itself.
+The demo deck that ships (14 cards across the six topics, including choice and fill-in-the-blank) teaches the techniques with the app itself.
 
 ## Run it
 
@@ -29,7 +29,7 @@ GitHub Pages works out of the box: point Pages at the repo root (main branch).
 
 ## Data
 
-- Stored under one localStorage key (`cognilab.state.v1`), versioned JSON.
+- Stored under one localStorage key (`cognilab.state.v2`), versioned JSON — older versions are migrated in place on load (v1 cards become flashcards; your schedule and review history survive).
 - **Export / import JSON** lives in the Library — that's also your backup.
 - Corrupted or mismatched data falls back to a fresh demo seed rather than failing.
 
