@@ -121,3 +121,43 @@ test('countWords: counts whitespace-separated words', () => {
   assert.equal(E.countWords('   '), 0);
   assert.equal(E.countWords(null), 0);
 });
+
+test('gradeAnswer: mcq correct choice passes, wrong choice fails', () => {
+  const card = { kind: 'mcq', answer: 'ABC ABC ABC', options: ['AAA BBB CCC', 'ABC ABC ABC', 'CCC BBB AAA'] };
+  assert.equal(E.gradeAnswer(card, 'ABC ABC ABC').correct, true);
+  assert.equal(E.gradeAnswer(card, 'AAA BBB CCC').correct, false);
+});
+
+test('gradeAnswer: mcq is case- and punctuation-insensitive', () => {
+  const card = { kind: 'mcq', answer: 'abc abc abc' };
+  assert.equal(E.gradeAnswer(card, 'ABC, ABC (ABC)').correct, true);
+});
+
+test('gradeAnswer: type answer matches exactly (normalised)', () => {
+  const card = { kind: 'type', answer: 'Retrieval practice' };
+  assert.equal(E.gradeAnswer(card, 'retrieval practice').correct, true);
+  assert.equal(E.gradeAnswer(card, 'rereading').correct, false);
+});
+
+test('gradeAnswer: typed phrase inside a longer answer counts', () => {
+  const card = { kind: 'type', answer: 'feynman technique' };
+  assert.equal(E.gradeAnswer(card, 'I would use the Feynman Technique here').correct, true);
+});
+
+test('gradeAnswer: accepted variants match', () => {
+  const card = { kind: 'type', answer: 'spaced repetition', accept: 'spacing|spaced practice' };
+  assert.equal(E.gradeAnswer(card, 'spacing').correct, true);
+  assert.equal(E.gradeAnswer(card, 'spaced practice').correct, true);
+  assert.equal(E.gradeAnswer(card, 'cramming').correct, false);
+});
+
+test('gradeAnswer: key-word subset that misses the core fails', () => {
+  const card = { kind: 'type', answer: 'the testing effect' };
+  // "effect" alone does not contain the key word "testing"
+  assert.equal(E.gradeAnswer(card, 'effect').correct, false);
+  assert.equal(E.gradeAnswer(card, 'that is the testing effect').correct, true);
+});
+
+test('gradeAnswer: rejects non-quiz cards', () => {
+  assert.throws(() => E.gradeAnswer({ kind: 'flash', answer: 'x' }, 'x'), /auto-graded/);
+});
